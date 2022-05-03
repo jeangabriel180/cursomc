@@ -1,13 +1,8 @@
 package com.jeangabriel.cursomc;
 
-import com.jeangabriel.cursomc.domain.Categoria;
-import com.jeangabriel.cursomc.domain.Cidade;
-import com.jeangabriel.cursomc.domain.Estado;
-import com.jeangabriel.cursomc.domain.Produto;
-import com.jeangabriel.cursomc.repositories.CategoriaRepository;
-import com.jeangabriel.cursomc.repositories.CidadeRepository;
-import com.jeangabriel.cursomc.repositories.EstadoRepository;
-import com.jeangabriel.cursomc.repositories.ProdutoRepository;
+import com.jeangabriel.cursomc.domain.*;
+import com.jeangabriel.cursomc.domain.enums.TipoCliente;
+import com.jeangabriel.cursomc.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -29,6 +24,12 @@ public class CursomcApplication implements CommandLineRunner {
 
     @Autowired
     private CidadeRepository cidadeRepository;
+
+    @Autowired
+    private ClienteRepository clienteRepository;
+
+    @Autowired
+    private EnderecoRepository enderecoRepository;
 
     public static void main(String[] args) {
         SpringApplication.run(CursomcApplication.class, args);
@@ -65,5 +66,19 @@ public class CursomcApplication implements CommandLineRunner {
 
         estadoRepository.saveAll(Arrays.asList(est1, est2));
         cidadeRepository.saveAll(Arrays.asList(c1, c2, c3));
+
+        Cliente cli1 = new Cliente(null, "Maria Silva", "maria@gmail.com", "1234", TipoCliente.PESSOAFISICA);
+        cli1.getTelefones().addAll(Arrays.asList("123456", "78941"));
+
+        Endereco e1 = new Endereco(null, "Rua Flores", "300", "Apto 303", "Jardia", "123456", cli1, c1);
+        Endereco e2 = new Endereco(null, "Avenida Matos", "105", "Sala800", "Centro", "4564564", cli1, c2);
+
+        cli1.getEnderecos().addAll(Arrays.asList(e1, e2));
+
+        clienteRepository.saveAll(Arrays.asList(cli1));
+        enderecoRepository.saveAll(Arrays.asList(e1, e2));
+
+        //(Integer id, String logradouro, String numero, String complemento, String bairro, String cnpj, Cliente cliente
+        //            , Endereco endereco, Cidade cidade)
     }
 }
