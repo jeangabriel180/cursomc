@@ -1,41 +1,59 @@
 package com.jeangabriel.cursomc.domain;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jeangabriel.cursomc.domain.enums.TipoCliente;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 public class Cliente implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String nome;
-    private String email;
-    private String cpf;
-    private Integer tipoCliente;
 
-    @JsonManagedReference
-    @OneToMany(mappedBy = "cliente")
+    @Column(unique = true)
+    private String email;
+    private String cpfOuCnpj;
+    private Integer tipo;
+
+    @JsonIgnore
+    private String senha;
+
+    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
     private List<Endereco> enderecos = new ArrayList<>();
 
-    //não precisa criar uma classe nova pois só tem um atributo simples e dependente de cliente
     @ElementCollection
     @CollectionTable(name = "TELEFONE")
     private Set<String> telefones = new HashSet<>();
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "PERFIS")
+    private Set<Integer> perfis = new HashSet<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "cliente")
+    private List<Pedido> pedidos = new ArrayList<>();
+
     public Cliente() {
+
     }
 
-    public Cliente(Integer id, String nome, String email, String cpf, TipoCliente tipoCliente) {
+    public Cliente(Integer id, String nome, String email, String senha, TipoCliente tipo) {
+        super();
         this.id = id;
         this.nome = nome;
         this.email = email;
-        this.tipoCliente = tipoCliente.getCod();
-        this.cpf = cpf;
+        this.senha = senha;
+        this.tipo = tipo.getCod();
     }
 
     public Integer getId() {
@@ -62,13 +80,23 @@ public class Cliente implements Serializable {
         this.email = email;
     }
 
-    public TipoCliente getTipoCliente() {
-        return TipoCliente.toEnum(tipoCliente);
+    public String getCpfOuCnpj() {
+        return cpfOuCnpj;
     }
 
-    public void setTipoCliente(TipoCliente tipoCliente) {
-        this.tipoCliente = tipoCliente.getCod();
+    public void setCpfOuCnpj(String cpfOuCnpj) {
+        this.cpfOuCnpj = cpfOuCnpj;
     }
+
+
+    public String getSenha() {
+        return senha;
+    }
+
+    public void setSenha(String senha) {
+        this.senha = senha;
+    }
+
 
     public List<Endereco> getEnderecos() {
         return enderecos;
@@ -86,28 +114,36 @@ public class Cliente implements Serializable {
         this.telefones = telefones;
     }
 
-    public String getCpf() {
-        return cpf;
+    public List<Pedido> getPedidos() {
+        return pedidos;
     }
 
-    public void setCpf(String cpf) {
-        this.cpf = cpf;
-    }
-
-    public void setTipoCliente(Integer tipoCliente) {
-        this.tipoCliente = tipoCliente;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Cliente cliente = (Cliente) o;
-        return id.equals(cliente.id);
+    public void setPedidos(List<Pedido> pedidos) {
+        this.pedidos = pedidos;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Cliente other = (Cliente) obj;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        return true;
     }
 }
